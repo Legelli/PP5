@@ -1,0 +1,266 @@
+%==================================================
+%      PREAMBOLO e DICHIARAZIONI INIZIALI
+%==================================================
+\documentclass[10pt,oneside,a4paper]{article}
+
+\usepackage[latin1]{inputenc} 
+\usepackage[italian]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{siunitx} %Inserisce automaticamente i dati con le unità  di misura correttamente formattate del SI (utilizzo: \SI{0.82}{m^2}, in generale \SI{misura con il punto decimale}{unità  di misura})
+\sisetup{output-decimal-marker = {.}, separate-uncertainty = true, input-uncertainty-signs = \pm, detect-weight=true, detect-family=true} %per usare SI con il punto decimale
+\usepackage{listings} %Per citare codice informatico formattandolo correttamente
+\usepackage{amsmath,amsthm,verbatim,amssymb,amsfonts,amscd,graphicx,mathtools}
+\usepackage[makeroom]{cancel}
+\newcommand{\abs}[1]{\left\lvert\,#1\,\right\rvert}
+\usepackage{geometry}
+\usepackage{epigraph}
+\usepackage{booktabs}	%tabelle migliorate
+\usepackage{tablefootnote}	%note a piè di pagina in tabella
+\usepackage{threeparttable} %tabella con note a piè di tabella
+\usepackage{caption}	%descrizione per figure
+\usepackage{dblfnote}
+\captionsetup{tableposition=top,figureposition=bottom,font=small} %setup descrizione
+\usepackage{float}
+\usepackage{esvect} %vettori
+\usepackage{longtable} %tabelle lunghe
+\usepackage[dvipsnames]{xcolor}
+\definecolor{sepia}{HTML}{80002A}
+\usepackage[colorlinks=true, citecolor=black, linkcolor=sepia, urlcolor=black]{hyperref}
+\usepackage{mathrsfs}
+\usepackage{circuitikz}
+\usepackage{enumitem} %Liste senza spazi verticali
+\setlist{noitemsep}
+\usepackage{amsmath}
+
+
+\usepackage{multicol}
+\newenvironment{Figure}
+  {\par\medskip\noindent\minipage{\linewidth}}
+  {\endminipage\par\medskip}
+
+\newcommand{\var}{\operatorname{var}}
+\newcommand{\cov}{\operatorname{cov}}
+
+
+\usepackage{listings} %Per inserire codice
+\lstnewenvironment{codice_c}[1][]
+{\lstset{basicstyle=\small\ttfamily, columns=fullflexible,
+keywordstyle=\color{red}\bfseries, commentstyle=\color{blue},
+language=C, basicstyle=\small,
+numbers=left, numberstyle=\tiny,
+stepnumber=2, numbersep=5pt, frame=shadowbox,  showstringspaces=false, #1}}{}
+
+%==================================================
+%                  PRIMA PAGINA
+%==================================================
+
+\title{\textsc{\textbf{Esercitazione 5}: Amplificatore operazionale 3}}
+\author{\small{G. Galbato Muscio} \and \small{L. Gravina} \and \small{L. Graziotto}}
+\date{20 Novembre 2018}
+
+\begin{document}
+	\begin{figure}
+		\centering
+		\includegraphics[scale=0.5, trim={2.8cm 8.9cm 0 9cm}, clip]{logo.png}
+	\end{figure}
+	\maketitle
+	\begin{center} 
+		\fbox{{\fontsize{12pt}{8mm}\textsc{Gruppo 11}}} \\
+	\end{center}
+\hrule
+\vspace{0.5cm}
+\renewcommand{\abstractname}{Abstract}
+\begin{abstract}
+Si realizzano un filtro VCVS passa basso e un generatore di rumore bianco basato su transistor di tipo 2N2222A; si studia l'andamento del modulo e della fase della funzione di trasferimento del filtro passa basso al variare della frequenza del segnale in ingresso.
+\end{abstract}
+\vspace{4cm}
+\tableofcontents %Indice
+\newpage
+
+
+\pagebreak
+\begin{multicols}{2}
+%==================================================
+%      		FILTRO VCVS
+%==================================================
+\section{Filtro VCVS passa basso}
+Si utilizza nel seguito l'amplificatore operazionale LM358N, e lo si alimenta con una differenza di potenziale di $\pm \SI{15}{V}$, connettendo gli ingressi \texttt{V+} e \texttt{GND} alla doppia alimentazione in continua, positiva e negativa. 
+
+Si realizza il seguente filtro passa basso VCVS
+
+%ESEMPIO DI CIRCUITO
+\begin{center}
+\begin{circuitikz}
+\draw (0,0) node[op amp] (opamp) {}
+(opamp.+) to[R=$R_1'$] ++(-2,0) node[circ] {} node[left] {$v_\text{2}$}
+(opamp.-) to[short] ++(0, 1.25) to[R = $R_2$] ++(2,0) -| (opamp.out)
+(opamp.-) node[circ] {}
+(opamp.+) node[circ] {}
+(opamp.-) to[R=$R_1$] ++(-2,0) node[circ] {} node[left] {$v_1$}
+(opamp.out) to[short, *-*] ++(0.5,0) node[right] {$v_\text{o}$}
+(opamp.+) to[R=$R_2'$] ++(0,-2) node[ground] {}
+;\end{circuitikz}
+\end{center}
+
+Nell'ipotesi di amplificatore ideale (quindi corrente d'ingresso nulla e tensioni ai due ingressi uguali) la funzione di trasferimento assume la forma 
+\begin{equation}\label{eq:trasferimento} %IL PRIMO MODO PER RIPORTARE UN'EQUAZIONE LUNGA È SPEZZARLA
+\begin{split}
+	\text{T}(\omega) = \frac{\text{k}}{1- \text{R}_1 \text{R}_2 \omega^2 \text{C}_1 \text{C}_2 + j \omega^2(\text{C}_1(\text{R}_1 + \text{R}_2) +} \\ \frac{}{+ \text{R}_1 \text{C}_2 (1-\text{k}))}
+\end{split}
+\end{equation}
+che per $\text{R}_2 = \text{R}_1$ e $\text{C}_2 = \text{C}_1$ si semplifica in
+\begin{equation}\label{eq:trasferimento_approx}
+	\text{T}(\omega) = \frac{\text{k}}{1 - (\omega \text{R}_1 \text{C}_1)^2 + j \omega \text{R}_1 \text{C}_1 (3-\text{k})}
+\end{equation}
+Nel caso generale, modulo e fase della funzione di trasferimento sono rispettivamente
+\begin{equation}\label{eq:modulo_trasf}%IL SECONDO MODO È SCALARLA
+	\resizebox{0.5\textwidth}{!}{$\vert \text{T} (\omega) \vert = \frac{\text{k}}{\sqrt{\left( 1 - \text{R}_1 \text{R}_2 \omega^2 \text{C}_1 \text{C}_2 \right)^2 + \omega^2 \left(\text{C}_1 (\text{R}_1 + \text{R}_2) + \text{R}_1 \text{C}_2 (1-\text{k})\right)^2}}$}
+\end{equation}
+\begin{equation}\label{eq:fase_trasf}
+	\phi(\omega) = \text{arctan}\left(\frac{\omega(\text{C}_1(\text{R}_1+\text{R}_2)+\text{R}_2\text{C}_2(1-\text{k}))}{1-\text{R}_1\text{R}_2\omega^2\text{C}_1\text{C}_2}\right)
+\end{equation}
+
+
+Si vuole scegliere una resistenza $\text{R}_1$ sufficientemente grande (nell'ordine delle decine di \SI{}{\kilo\ohm}) per aumentare la resistenza di ingresso $\text{R}_\text{i}$ del filtro e dunque ridurre le perturbazioni del segnale in ingresso.
+
+Per ottenere $\text{R}_1$ il più possibile simile a $\text{R}_2$ si è usato per la seconda un trimmer, un altro trimmer è stato usato per la resistenza $\text{R}_3$ in modo da poter controllare con precisione il valore di amplificazione del filtro.
+
+Il circuito è stato realizzato con i seguenti componenti fissi:
+\begin{itemize} %Lo spazio verticale è stato tolto con \setlist{noitemsep} nell'header, rimuovere quella riga per avere una lista classica
+	\item[--] $\text{R}_1 = \SI{111 \pm 111}{\kilo\ohm}$;
+	\item[--] $\text{R}_2 = \SI{111 \pm 111}{\kilo\ohm}$;
+	\item[--] $\text{R}_4 = \SI{111 \pm 111}{\kilo\ohm}$;
+	\item[--] $\text{C}_1 = \SI{111 \pm 111}{\nano\farad}$;
+	\item[--] $\text{C}_2 = \SI{111 \pm 111}{\nano\farad}$
+\end{itemize}
+Il valore di $\text{R}_3$ non è riportato tra gli altri non essendo esso un valore fisso.
+
+\subsection{Overshooting}
+
+Come prima misura, si sceglie il valore di $\text{R}_3 = (1 - \text{k}) \text{R}_4 = \SI{111 \pm 111}{\kilo\ohm}$, ovvero si sceglie $\text{k} = \SI{111}{}$: essendo $\text{k} > \text{k}_\text{limite} \equiv 1.586$ ci si aspetta un picco del modulo della funzione di trasferimento in corrispondenza della frequenza di taglio del filtro. 
+
+I risultati delle misure sono riportati in Tabella~\ref{tab:filtro_uno}. Dalle misure di tensione a frequenze sufficientemente basse (si considerano le prime 111 misure) si può ricavare un valore di amplificazione reale pari a $\text{A}_\text{v} \equiv - \text{k}_\text{teorico} = \SI{-111 \pm 111}{}$ con incertezza data dalla deviazione standard, il valore misurato risulta compatibile con quello voluto. Gli andamenti del modulo e della fase della funzione di trasferimento sono riportati in Figura~\ref{fig:modulo_filtro} e in Figura~\ref{fig:fase_filtro}, sovrapposte ai dati sperimentali ci sono le curve teoriche ottenute da (\ref{eq:modulo_trasf}) e (\ref{eq:fase_trasf}) corrispondenti ai valori misurati dei componenti.
+
+\begin{center}
+\captionof{table}{Misure dello studio in frequenza del filtro VCVS con $\text{k} >  \text{k}_\text{limite}$.}
+\label{tab:filtro_uno}
+\begin{tabular}{c|c|c|c}
+$f$ [\SI{}{Hz}] & $V_i$ [\SI{}{V}] & $v_o$ [\SI{}{mV}] & $\Delta t [\SI{}{s}]$ \\
+\hline
+\hline
+\end{tabular}
+\end{center}
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{MODULO FUNZIONE DI TRASFERIMENTO}
+%	\captionof{figure}{Diagramma di Bode del modulo della funzione di trasferimento al variare delle frequenze. Si riportano gli andamenti per un filtro di Butterworth e per un valore di k superiore a quello di quest'ultimo, sovrapposte ai dati sperimentali si riportano le curve teoriche. }
+%	\label{fig:modulo_filtro}
+%	\end{center}
+%\end{Figure}
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{FASE FUNZIONE DI TRASFERIMENTO}
+%	\captionof{figure}{Diagramma di Bode della fase della funzione di trasferimento al variare delle frequenze. Si riportano gli andamenti per un filtro di Butterworth e per un valore di k superiore a quello di quest'ultimo, sovrapposte ai dati sperimentali si riportano le curve teoriche. }
+%	\label{fig:fase_filtro}
+%	\end{center}
+%\end{Figure}
+
+Gli andamenti sono compatibili con quelli teorici: il modulo ha un massimo in corrispondenza di $\omega_\text{T} = \SI{111 \pm 111}{\hertz}$, valore che è stato stimato come la frequenza intermedia tra le misure corrispondenti ai due valori di $\vert \text{T}(\omega) \vert$ più elevati, compatibile con quello ricavabile da (\ref{eq:trasferimento_approx}) pari a $\omega_\text{teo} = \SI{111 \pm 111}{\hertz}$; inoltre la fase assume il valore di $-\pi / 2$ in corrispondenza di $\omega_\phi = \SI{111 \pm 111}{\hertz}$ inferito dalla retta congiungente i due punti sperimentali più vicini al valore teorico assunto della fase alla frequenza di taglio, anche questo valore risulta compatibile con quello teorico.
+
+\subsection{Butterworth}
+
+Come seconda misura si sceglie il valore di $\text{R}_3 = \SI{111 \pm 111}{\kilo\ohm}$, ovvero si sceglie $\text{k} = \SI{111} \approx \text{k}_\text{limite}$, cioè si realizza un filtro \emph{Butterworth}. In queste condizioni non ci si aspetta alcun picco del modulo della funzione di trasferimento. I risultati delle misure sono riportati in Tabella~\ref{tab:filtro_due}, gli andamenti del modulo e della fase della funzione di trasferimento sono riportati in Figura~\ref{fig:modulo_filtro} e in Figura~\ref{fig:fase_filtro}.
+
+\begin{center}
+\captionof{table}{Misure dello studio in frequenza del filtro VCVS con $\text{k} = \text{k}_\text{limite}$}
+\label{tab:filtro_due}
+\begin{tabular}{c|c|c|c}
+$f$ [\SI{}{Hz}] & $V_i$ [\SI{}{V}] & $v_o$ [\SI{}{mV}] & $\Delta t [\SI{}{s}]$ \\
+\hline
+\hline
+\end{tabular}
+\end{center}
+
+Gli andamenti sono ancora compatibili con quelli teorici, infatti dall'andamento del modulo si stima una frequenza di taglio pari a $\omega_{\text{T}} = \SI{111 \pm 111}{\hertz}$ ottenuto come la frequenza dell'intersezione tra l'interpolazione lineare in regime costante (misure da 1 a 111) traslata verso il basso di $\SI{-3}{\decibel}$\footnote{Ossia il valore del modulo della funzione di trasferimento alla frequenza di taglio.} e quella a regime di discesa asintotica (misure da 111 a 111), valore compatibile con quello teorico di $\omega_\text{teo} = \SI{111 \pm 111}{\hertz}$; anche dall'andamento della fase si può stimare, come fatto nel paragrafo precedente, la frequenza di taglio ottenendo $\omega_\phi = \SI{111 \pm 111}{\hertz}$ ancora compatibile con l'aspettativa teorica.
+
+%==================================================
+%      		GENERATORE DI RUMORE
+%==================================================
+\section{Generatore di rumore}
+Si realizza un generatore di rumore \emph{bianco} amplificando quello generato da una giunzione pn in regime di breakdown, il circuito costruito è il seguente
+\begin{center}
+\begin{circuitikz}
+\draw (0,0) node[op amp] (opamp) {}
+(opamp.+) to[R=$R_1'$] ++(-2,0) node[circ] {} node[left] {$v_\text{2}$}
+(opamp.-) to[short] ++(0, 1.25) to[R = $R_2$] ++(2,0) -| (opamp.out)
+(opamp.-) node[circ] {}
+(opamp.+) node[circ] {}
+(opamp.-) to[R=$R_1$] ++(-2,0) node[circ] {} node[left] {$v_1$}
+(opamp.out) to[short, *-*] ++(0.5,0) node[right] {$v_\text{o}$}
+(opamp.+) to[R=$R_2'$] ++(0,-2) node[ground] {}
+;\end{circuitikz}
+\end{center}
+dove i componenti scelti hanno valori:
+\begin{itemize} %Lo spazio verticale è stato tolto con \setlist{noitemsep} nell'header, rimuovere quella riga per avere una lista classica
+	\item[--] $\text{V}_\text{in} = \SI{111 \pm 111}{\volt}$;
+	\item[--] $\text{R}_1 = \SI{111 \pm 111}{\kilo\ohm}$;
+	\item[--] $\text{R}_2 = \SI{111 \pm 111}{\kilo\ohm}$;
+	\item[--] $\text{R}_3 = \SI{111 \pm 111}{\kilo\ohm}$;
+	\item[--] $\text{R}_4 = \SI{111 \pm 111}{\kilo\ohm}$;
+	\item[--] $\text{C}_1 = \SI{111 \pm 111}{\nano\farad}$;
+	\item[--] $\text{C}_2 = \SI{111 \pm 111}{\nano\farad}$
+	\item[--] $\text{C}_3 = \SI{111 \pm 111}{\nano\farad}$
+	\item[--] $\text{C}_4 = \SI{111 \pm 111}{\nano\farad}$
+\end{itemize}
+
+Il collettore del transistor $\text{Q}_1$ è lasciato flottante in quanto lo si vuole utilizzare come diodo, entrambi i transistor sono di tipo 2N2222A.
+
+Si riporta in Figura~\ref{fig:rumore} il segnale di rumore rilevato dall'oscilloscopio, il rumore ha ampiezza picco-picco misurata con l'oscilloscopio pari a $\text{V}_\text{noise} = \SI{111 \pm 111}{\milli\volt}$.
+Collegando l'uscita del generatore all'ingresso del filtro passa basso costruito alla sezione precedente si ottiene il segnale riportato in Figura~\ref{fig:rumore_filtro}: questo rumore risulta attutito rispetto al caso precedente in quanto le componenti del rumore a frequenza più alta vengono abbattute dal filtro.
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{RUMORE SEMPLICE}
+%	\captionof{figure}{Istantanea dell'oscilloscopio del segnale di rumore bianco prodotto da una giunzione pn in regime di breakdown.}
+%	\label{fig:rumore}
+%	\end{center}
+%\end{Figure}
+
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{RUMORE FILTRO}
+%	\captionof{figure}{Istantanea dell'oscilloscopio del segnale di rumore bianco attutito da un filtro passa basso VCVS}
+%	\label{fig:rumore_filtro}
+%	\end{center}
+%\end{Figure}
+
+
+%ESEMPIO DI FIGURA
+%\begin{Figure}
+%	\begin{center}
+%	\includegraphics[width=\linewidth]{comune.png}
+%	\captionof{figure}{Istantanea dell'oscilloscopio per l'amplificatore differenziale, misura di $A_c$}
+%	\label{fig:Ac_differenziale}
+%	\end{center}
+%\end{Figure}
+
+
+%ESEMPIO DI TABELLA
+%\begin{center}
+%\captionof{table}{Misure per la stima di $A_c$}
+%\label{tab:Ac_differenziale}
+%\begin{tabular}{c|c|c|c}
+%$f$ [\SI{}{Hz}] & $V_i$ [\SI{}{V}] & $v_o$ [\SI{}{mV}] & $A_c = v_o / V_i$ \\
+%\hline
+%      149.5 &        3.90 &         11.3 & 2.90e-03 \\
+%      222.0 &        3.90 &         11.5 & 2.95e-03 \\
+%      281.0 &        3.90 &         11.8 & 3.03e-03 \\
+%      359.0 &        3.90 &         11.8 & 3.03e-03 \\
+%      461.0 &        3.90 &         12.2 & 3.13e-03 \\
+%\hline
+%\end{tabular}
+%\end{center}
+\end{multicols}
+\end{document}
