@@ -28,6 +28,8 @@
 \usepackage[colorlinks=true, citecolor=black, linkcolor=sepia, urlcolor=black]{hyperref}
 \usepackage{mathrsfs}
 \usepackage{circuitikz}
+\ctikzset{bipoles/resistor/height=0.2}
+\ctikzset{bipoles/resistor/width=0.4}
 \usepackage{enumitem} %Liste senza spazi verticali
 \setlist{noitemsep}
 \usepackage{amsmath}
@@ -86,39 +88,48 @@ Si realizzano un filtro VCVS passa basso e un generatore di rumore bianco basato
 \section{Filtro VCVS passa basso}
 Si utilizza nel seguito l'amplificatore operazionale LM358N, e lo si alimenta con una differenza di potenziale di $\pm \SI{15}{V}$, connettendo gli ingressi \texttt{V+} e \texttt{GND} alla doppia alimentazione in continua, positiva e negativa. 
 
-Si realizza il seguente filtro passa basso VCVS
+Si realizza il seguente filtro passa basso VCVS.
 
 %ESEMPIO DI CIRCUITO
 \begin{center}
-\begin{circuitikz}
-\draw (0,0) node[op amp] (opamp) {}
-(opamp.+) to[R=$R_1'$] ++(-2,0) node[circ] {} node[left] {$v_\text{2}$}
-(opamp.-) to[short] ++(0, 1.25) to[R = $R_2$] ++(2,0) -| (opamp.out)
-(opamp.-) node[circ] {}
-(opamp.+) node[circ] {}
-(opamp.-) to[R=$R_1$] ++(-2,0) node[circ] {} node[left] {$v_1$}
+\begin{circuitikz}[scale=0.7]
+\draw (0,0) node[op amp, yscale=-1] (opamp) {}
+(opamp.+) -- ++(-1.2,0) node[circ]{} to[C=$C_1$] ++(0,-1.5) node[ground]{}
 (opamp.out) to[short, *-*] ++(0.5,0) node[right] {$v_\text{o}$}
-(opamp.+) to[R=$R_2'$] ++(0,-2) node[ground] {}
+(opamp.-) -- ++(0,-1) node[circ] {} to[R=$R_4$] ++(0,-1.5) node[ground]{}
+(opamp.-) ++(0,-1) to[R=$R_3$] ++(3,0) -| (opamp.out)
+(opamp.+) ++(-1.2,0) to[R=$R_2$] ++(-2,0) to[R=$R_1$] ++(-2,0) node[circ]{} node[left]{$v_i$}
+(opamp.+) ++(-1.2,0) ++(-2,0) node[circ]{} -- ++(0,1.5) to[C=$C_2$] ++(4,0) -| (opamp.out)
 ;\end{circuitikz}
 \end{center}
 
 Nell'ipotesi di amplificatore ideale (quindi corrente d'ingresso nulla e tensioni ai due ingressi uguali) la funzione di trasferimento assume la forma 
+\tiny{
 \begin{equation}\label{eq:trasferimento} %IL PRIMO MODO PER RIPORTARE UN'EQUAZIONE LUNGA È SPEZZARLA
-\begin{split}
-	\text{T}(\omega) = \frac{\text{k}}{1- \text{R}_1 \text{R}_2 \omega^2 \text{C}_1 \text{C}_2 + j \omega^2(\text{C}_1(\text{R}_1 + \text{R}_2) +} \\ \frac{}{+ \text{R}_1 \text{C}_2 (1-\text{k}))}
-\end{split}
-\end{equation}
+	\text{T}(\omega) = \frac{k}{1- \text{R}_1 \text{R}_2 \omega^2 \text{C}_1 \text{C}_2 + j \omega^2(\text{C}_1(\text{R}_1 + \text{R}_2) + \text{R}_1 \text{C}_2 (1-k))}
+\end{equation}}
+\normalsize
 che per $\text{R}_2 = \text{R}_1$ e $\text{C}_2 = \text{C}_1$ si semplifica in
 \begin{equation}\label{eq:trasferimento_approx}
-	\text{T}(\omega) = \frac{\text{k}}{1 - (\omega \text{R}_1 \text{C}_1)^2 + j \omega \text{R}_1 \text{C}_1 (3-\text{k})}
+	\text{T}(\omega) = \frac{k}{1 - (\omega \text{R}_1 \text{C}_1)^2 + j \omega \text{R}_1 \text{C}_1 (3-k)}
 \end{equation}
-Nel caso generale, modulo e fase della funzione di trasferimento sono rispettivamente
-\begin{equation}\label{eq:modulo_trasf}%IL SECONDO MODO È SCALARLA
-	\resizebox{0.5\textwidth}{!}{$\vert \text{T} (\omega) \vert = \frac{\text{k}}{\sqrt{\left( 1 - \text{R}_1 \text{R}_2 \omega^2 \text{C}_1 \text{C}_2 \right)^2 + \omega^2 \left(\text{C}_1 (\text{R}_1 + \text{R}_2) + \text{R}_1 \text{C}_2 (1-\text{k})\right)^2}}$}
-\end{equation}
-\begin{equation}\label{eq:fase_trasf}
-	\phi(\omega) = \text{arctan}\left(\frac{\omega(\text{C}_1(\text{R}_1+\text{R}_2)+\text{R}_2\text{C}_2(1-\text{k}))}{1-\text{R}_1\text{R}_2\omega^2\text{C}_1\text{C}_2}\right)
-\end{equation}
+%Nel caso generale, modulo e fase della funzione di trasferimento sono rispettivamente
+%\begin{equation}\label{eq:modulo_trasf}%IL SECONDO MODO È SCALARLA
+%	\resizebox{0.5\textwidth}{!}{$\vert \text{T} (\omega) \vert = \frac{\text{k}}{\sqrt{\left( 1 - \text{R}_1 \text{R}_2 \omega^2 \text{C}_1 \text{C}_2 \right)^2 + \omega^2 \left(\text{C}_1 (\text{R}_1 + \text{R}_2) + \text{R}_1 \text{C}_2 (1-\text{k})\right)^2}}$}
+%\end{equation}
+%\begin{equation}\label{eq:fase_trasf}
+%	\phi(\omega) = \text{arctan}\left(\frac{\omega(\text{C}_1(\text{R}_1+\text{R}_2)+\text{R}_2\text{C}_2(1-\text{k}))}{1-\text{R}_1\text{R}_2\omega^2\text{C}_1\text{C}_2}\right)
+%\end{equation}
+Il modulo e la fase della funzione di trasferimento valgono dunque
+\small{
+\[
+\lvert T(w)\rvert = \frac{k}{\big(1-\omega^2(C_1R_1)^2\big)^2+\big((3-k)^2\omega^2C_1^2R_1^2\big)^2}
+\]}
+\small{
+\[
+\phi(\omega)= -\arctan\left(\frac{(3-k)\omega C_1R_1}{1-\omega^2(C_1R_1)^2}\right)
+\]}
+\normalsize
 
 
 Si vuole scegliere una resistenza $\text{R}_1$ sufficientemente grande (nell'ordine delle decine di \SI{}{\kilo\ohm}) per aumentare la resistenza di ingresso $\text{R}_\text{i}$ del filtro e dunque ridurre le perturbazioni del segnale in ingresso.
@@ -133,19 +144,27 @@ Il circuito è stato realizzato con i seguenti componenti fissi:
 	\item[--] $\text{C}_1 = \SI{111 \pm 111}{\nano\farad}$;
 	\item[--] $\text{C}_2 = \SI{111 \pm 111}{\nano\farad}$
 \end{itemize}
-Il valore di $\text{R}_3$ non è riportato tra gli altri non essendo esso un valore fisso.
+Il valore di $\text{R}_3$ non è riportato tra gli altri non avendo esso un valore fisso.
+
+Si stima la frequenza di taglio del circuito, dati i componenti usati, dalla~(\ref{eq:trasferimento}):
+\[
+f_T = \frac{1}{2\pi\sqrt{R_1R_2C_1C_2}} = \SI{111 \pm 111}{Hz}.
+\]
 
 \subsection{Overshooting}
 
-Come prima misura, si sceglie il valore di $\text{R}_3 = (1 - \text{k}) \text{R}_4 = \SI{111 \pm 111}{\kilo\ohm}$, ovvero si sceglie $\text{k} = \SI{111}{}$: essendo $\text{k} > \text{k}_\text{limite} \equiv 1.586$ ci si aspetta un picco del modulo della funzione di trasferimento in corrispondenza della frequenza di taglio del filtro. 
+Come prima misura, si sceglie il valore di 
+\[
+R_3 = (k-1) R_4 = \SI{111 \pm 111}{\kilo\ohm},
+\] ovvero si sceglie $k = \SI{111}{}$: essendo $k > l_\text{limite} \equiv 1.586$ ci si aspetta un picco del modulo della funzione di trasferimento in corrispondenza della frequenza di taglio del filtro. 
 
-I risultati delle misure sono riportati in Tabella~\ref{tab:filtro_uno}. Dalle misure di tensione a frequenze sufficientemente basse (si considerano le prime 111 misure) si può ricavare un valore di amplificazione reale pari a $\text{A}_\text{v} \equiv - \text{k}_\text{teorico} = \SI{-111 \pm 111}{}$ con incertezza data dalla deviazione standard, il valore misurato risulta compatibile con quello voluto. Gli andamenti del modulo e della fase della funzione di trasferimento sono riportati in Figura~\ref{fig:modulo_filtro} e in Figura~\ref{fig:fase_filtro}, sovrapposte ai dati sperimentali ci sono le curve teoriche ottenute da (\ref{eq:modulo_trasf}) e (\ref{eq:fase_trasf}) corrispondenti ai valori misurati dei componenti.
+I risultati delle misure sono riportati in Tabella~\ref{tab:filtro_uno}. Dalle misure di tensione a frequenze sufficientemente basse (si considerano le prime 111 misure) si può ricavare un valore di amplificazione reale pari a $A_v = \SI{-111 \pm 111}{}$ con incertezza data dalla deviazione standard; il valore misurato risulta compatibile con quello previsto, ossia $A_v^\text{\footnotesize{(atteso)}} = k$. Gli andamenti del modulo e della fase della funzione di trasferimento sono riportati in Figura~\ref{fig:modulo_filtro} e in Figura~\ref{fig:fase_filtro}.%, sovrapposte ai dati sperimentali ci sono le curve teoriche ottenute da (\ref{eq:modulo_trasf}) e (\ref{eq:fase_trasf}) corrispondenti ai valori misurati dei componenti.
 
 \begin{center}
 \captionof{table}{Misure dello studio in frequenza del filtro VCVS con $\text{k} >  \text{k}_\text{limite}$.}
 \label{tab:filtro_uno}
 \begin{tabular}{c|c|c|c}
-$f$ [\SI{}{Hz}] & $V_i$ [\SI{}{V}] & $v_o$ [\SI{}{mV}] & $\Delta t [\SI{}{s}]$ \\
+$f$ [\SI{}{Hz}] & $v_i$ [\SI{}{V}] & $v_o$ [\SI{}{mV}] & $\Delta t [\SI{}{s}]$ \\
 \hline
 \hline
 \end{tabular}
@@ -167,7 +186,7 @@ $f$ [\SI{}{Hz}] & $V_i$ [\SI{}{V}] & $v_o$ [\SI{}{mV}] & $\Delta t [\SI{}{s}]$ \
 %	\end{center}
 %\end{Figure}
 
-Gli andamenti sono compatibili con quelli teorici: il modulo ha un massimo in corrispondenza di $\omega_\text{T} = \SI{111 \pm 111}{\hertz}$, valore che è stato stimato come la frequenza intermedia tra le misure corrispondenti ai due valori di $\vert \text{T}(\omega) \vert$ più elevati, compatibile con quello ricavabile da (\ref{eq:trasferimento_approx}) pari a $\omega_\text{teo} = \SI{111 \pm 111}{\hertz}$; inoltre la fase assume il valore di $-\pi / 2$ in corrispondenza di $\omega_\phi = \SI{111 \pm 111}{\hertz}$ inferito dalla retta congiungente i due punti sperimentali più vicini al valore teorico assunto della fase alla frequenza di taglio, anche questo valore risulta compatibile con quello teorico.
+Gli andamenti sono compatibili con quelli teorici: il modulo ha un massimo in corrispondenza di $f_T = \SI{111 \pm 111}{\hertz}$, valore che è stato stimato come la frequenza intermedia tra le misure corrispondenti ai due valori di $\vert T(f) \vert$ più elevati, compatibile con quello ricavabile da (\ref{eq:trasferimento_approx}) pari a $f_T^{\text{\footnotesize{(attesa)}}} = \SI{111 \pm 111}{\hertz}$; inoltre la fase assume il valore di $-\pi / 2$ in corrispondenza di $f_\phi = \SI{111 \pm 111}{\hertz}$ inferito dalla retta congiungente i due punti sperimentali più vicini al valore teorico assunto della fase alla frequenza di taglio, anche questo valore risulta compatibile con quello teorico.
 
 \subsection{Butterworth}
 
